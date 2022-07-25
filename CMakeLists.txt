@@ -18,7 +18,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/tools")
 project (OSAL VERSION 0.1.0)
 set(CMAKE_C_COMPILER "/home/cc/software/openwrt-21.02/bin/targets/ramips/mt76x8/openwrt-toolchain-ramips-mt76x8_gcc-8.4.0_musl.Linux-x86_64/toolchain-mipsel_24kc_gcc-8.4.0_musl/bin/mipsel-openwrt-linux-gcc")
-set(CMAKE_CXX_COMPILER "=/home/cc/software/openwrt-21.02/bin/targets/ramips/mt76x8/openwrt-toolchain-ramips-mt76x8_gcc-8.4.0_musl.Linux-x86_64/toolchain-mipsel_24kc_gcc-8.4.0_musl/bin/mipsel-openwrt-linux-g++")
+set(CMAKE_CXX_COMPILER "/home/cc/software/openwrt-21.02/bin/targets/ramips/mt76x8/openwrt-toolchain-ramips-mt76x8_gcc-8.4.0_musl.Linux-x86_64/toolchain-mipsel_24kc_gcc-8.4.0_musl/bin/mipsel-openwrt-linux-g++")
 
 include(GetGitRevision)
 
