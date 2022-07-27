@@ -100,7 +100,7 @@ os_mutex_t * os_mutex_create (void)
       return NULL;
    }
 
-   CC_STATIC_ASSERT (_POSIX_THREAD_PRIO_INHERIT > 0);
+   //CC_STATIC_ASSERT (_POSIX_THREAD_PRIO_INHERIT > 0);
    pthread_mutexattr_init (&mattr);
    pthread_mutexattr_setprotocol (&mattr, PTHREAD_PRIO_INHERIT);
    pthread_mutexattr_settype (&mattr, PTHREAD_MUTEX_RECURSIVE);
@@ -451,9 +451,8 @@ void os_mbox_destroy (os_mbox_t * mbox)
    free (mbox);
 }
 
-static void os_timer_thread (void * arg)
-{
-   os_timer_t * timer = arg;
+static void os_timer_thread(union sigval val) {
+   os_timer_t * timer = val.sival_ptr;
    sigset_t sigset;
    siginfo_t si;
    struct timespec tmo;
@@ -464,18 +463,11 @@ static void os_timer_thread (void * arg)
    sigemptyset (&sigset);
    sigprocmask (SIG_BLOCK, &sigset, NULL);
    sigaddset (&sigset, SIGALRM);
-
-   tmo.tv_sec  = 0;
-   tmo.tv_nsec = 500 * 1000 * 1000;
-
-   while (!timer->exit)
+   int sig = sigtimedwait (&sigset, &si, &tmo);
+   if (sig == SIGALRM)
    {
-      int sig = sigtimedwait (&sigset, &si, &tmo);
-      if (sig == SIGALRM)
-      {
-         if (timer->fn)
-            timer->fn (timer, timer->arg);
-      }
+      if (timer->fn)
+         timer->fn (timer, timer->arg);
    }
 }
 
@@ -507,25 +499,10 @@ os_timer_t * os_timer_create (
    timer->us        = us;
    timer->oneshot   = oneshot;
 
-   /* Create timer thread */
-   timer->thread =
-      os_thread_create ("os_timer", TIMER_PRIO, 1024, os_timer_thread, timer);
-   if (timer->thread == NULL)
-   {
-      free (timer);
-      return NULL;
-   }
-
-   /* Wait until timer thread sets its (kernel) thread id */
-   do
-   {
-      sched_yield();
-   } while (timer->thread_id == 0);
-
    /* Create timer */
-   sev.sigev_notify            = SIGEV_THREAD_ID;
+   sev.sigev_notify            = SIGEV_THREAD;
    sev.sigev_value.sival_ptr   = timer;
-   sev._sigev_un._tid          = timer->thread_id;
+   sev.sigev_notify_function   = os_timer_thread;
    sev.sigev_signo             = SIGALRM;
    sev.sigev_notify_attributes = NULL;
 
