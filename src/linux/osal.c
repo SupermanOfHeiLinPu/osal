@@ -453,22 +453,13 @@ void os_mbox_destroy (os_mbox_t * mbox)
 
 static void os_timer_thread(union sigval val) {
    os_timer_t * timer = val.sival_ptr;
-   sigset_t sigset;
-   siginfo_t si;
-   struct timespec tmo;
 
    timer->thread_id = (pid_t)syscall (SYS_gettid);
 
    /* Add SIGALRM */
-   sigemptyset (&sigset);
-   sigprocmask (SIG_BLOCK, &sigset, NULL);
-   sigaddset (&sigset, SIGALRM);
-   int sig = sigtimedwait (&sigset, &si, &tmo);
-   if (sig == SIGALRM)
-   {
-      if (timer->fn)
+      if (timer->fn) {
          timer->fn (timer, timer->arg);
-   }
+      }
 }
 
 os_timer_t * os_timer_create (
